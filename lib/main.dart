@@ -9,7 +9,7 @@ import 'package:location/location.dart';
 void main() {
   runApp(const MyApp());
 }
-
+double controlCordi = 0.0;
 int positionBySteps =0;
 String origin = "";
 String destination= "";
@@ -45,16 +45,25 @@ class _MyHomePageState extends State<MyHomePage> {
   List<dynamic> stepsCordi = [];
   List<dynamic> maneuver = [];
   List<dynamic> dis = [];
+  List<dynamic> steps = [];
 
   Future<void> getRoute() async {
-    String apiKey = "Api Key needed";
-    String url =
-        "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=walking&key=$apiKey";
-    List<dynamic> steps = [];
-    var response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      Map<String, dynamic> data = json.decode(response.body);
-      steps = await data['routes'][0]['legs'][0]['steps'];
+    if(stepsCordi.isEmpty) {
+      String apiKey = "AIzaSyCJFmfvLQiDVVGqC0-gKHMrQatgMBKHTs0";
+      String url =
+          "https://maps.googleapis.com/maps/api/directions/json?origin=$origin&destination=$destination&mode=walking&key=$apiKey";
+      var response = await http.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        Map<String, dynamic> data = json.decode(response.body);
+        if (data.isEmpty) {
+          print("Somthing went wrong with URL request");
+        }
+        steps = await data['routes'][0]['legs'][0]['steps'];
+      }
+
+      print("Should be printed 1 time");
+      maneuver = [];
+      dis = [];
     }
 
     // all possible maneuver
@@ -162,6 +171,7 @@ if(maneuver.isEmpty) {
 }
 
     double checkDistance = await calculateDistance(positionBySteps);
+
     print(checkDistance);
     print(positionBySteps);
     print(stepsCordi[0]);
@@ -214,14 +224,14 @@ if(maneuver.isEmpty) {
   }
 
   void _sendMessage() {
-  origin = _controller.text;
+  origin = "${currentLocation!.latitude!},${currentLocation!.longitude!}";
   destination = _controller1.text;
   getRoute();
   }
 
   @override
   Widget build(BuildContext context) {
-    origin == "" && destination == ""
+     destination == ""
         ? const Center()
         : getRoute();
     return Scaffold(
@@ -232,13 +242,6 @@ if(maneuver.isEmpty) {
       ),
         body: Column(
           children: [
-        TextField(
-          decoration: InputDecoration(
-            border: OutlineInputBorder(),
-            hintText: 'Start (Leerzeichen mit + ersetzen)',
-          ),
-          controller: _controller,
-        ),
             TextField(
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
