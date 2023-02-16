@@ -9,7 +9,9 @@ import 'package:location/location.dart';
 void main() {
   runApp(const MyApp());
 }
-double controlCordi = 0.0;
+
+int waitIfBigger = 10;
+double checkDistancOne = 0.0;
 int positionBySteps =0;
 String origin = "";
 String destination= "";
@@ -64,7 +66,10 @@ class _MyHomePageState extends State<MyHomePage> {
       print("Should be printed 1 time");
       maneuver = [];
       dis = [];
+
     }
+
+    print(stepsCordi);
 
     // all possible maneuver
     //     turn-right: The driver should turn right at the next intersection.
@@ -171,11 +176,20 @@ if(maneuver.isEmpty) {
 }
 
     double checkDistance = await calculateDistance(positionBySteps);
-
     print(checkDistance);
     print(positionBySteps);
     print(stepsCordi[0]);
 
+    if(checkDistance > checkDistancOne){
+      waitIfBigger++;
+      if(waitIfBigger == 10){
+        checkDistancOne = checkDistance;
+        waitIfBigger = 0;
+        stepsCordi = [];
+      }
+    }
+
+    checkDistancOne = checkDistance;
 
     if (checkDistance < 0.05 ) {
       print('The current location and destination location match: send 3, ${maneuver[positionBySteps]}, Position: ${positionBySteps}');
